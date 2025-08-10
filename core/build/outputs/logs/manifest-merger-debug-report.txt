@@ -1,16 +1,16 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest10150458677128479871.xml:2:13-83
-INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest10150458677128479871.xml:2:13-83
+ADDED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest9708512862808083009.xml:2:13-83
+INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest9708512862808083009.xml:2:13-83
 	package
-		INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest10150458677128479871.xml
+		INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest9708512862808083009.xml
 	xmlns:android
-		ADDED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest10150458677128479871.xml:2:23-81
+		ADDED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest9708512862808083009.xml:2:23-81
 uses-sdk
-INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest10150458677128479871.xml reason: use-sdk injection requested
-INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest10150458677128479871.xml
-INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest10150458677128479871.xml
+INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest9708512862808083009.xml reason: use-sdk injection requested
+INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest9708512862808083009.xml
+INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest9708512862808083009.xml
 	android:targetSdkVersion
-		INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest10150458677128479871.xml
+		INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest9708512862808083009.xml
 	android:minSdkVersion
-		INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest10150458677128479871.xml
+		INJECTED from /Users/velaphimathebula/AndroidStudioProjects/FitnessTracker/core/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest9708512862808083009.xml

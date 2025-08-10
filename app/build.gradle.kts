@@ -2,7 +2,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
-    id("com.google.dagger.hilt.android")
+    alias(libs.plugins.hilt)
+    kotlin("kapt")
 }
 
 android {
@@ -75,7 +76,7 @@ dependencies {
     
     // Dependency Injection
     implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
+    kapt(libs.hilt.android.compiler)
     
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
@@ -88,7 +89,7 @@ dependencies {
     // Database
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
+    kapt(libs.room.compiler)
     
     // Testing
     testImplementation(libs.junit)

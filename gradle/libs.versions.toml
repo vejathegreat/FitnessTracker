@@ -61,6 +61,7 @@ hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref =
 # Dependency Injection
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hiltAndroid" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt" }
 
 # Coroutines
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
@@ -87,5 +88,5 @@ android-application = { id = "com.android.application", version = "8.2.2" }
 android-library = { id = "com.android.library", version = "8.2.2" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-hilt = { id = "com.google.dagger.hilt.android", version = "2.48" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 
