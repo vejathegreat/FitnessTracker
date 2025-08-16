@@ -1,55 +1,48 @@
 package com.velaphi.workouttracker.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.velaphi.workouttracker.WorkoutState
 import com.velaphi.workouttracker.WorkoutViewModel
+import com.velaphi.core.data.WorkoutGoal
 
 @Composable
 fun WorkoutStartCard(
     viewModel: WorkoutViewModel,
     onStartWorkout: () -> Unit,
-    onStopWorkout: () -> Unit
+    onStopWorkout: () -> Unit,
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
     val workoutState by viewModel.workoutState.collectAsState()
     val workoutDuration by viewModel.workoutDuration.collectAsState()
+    val workoutGoals by viewModel.workoutGoals.collectAsState()
+    
+    val activeGoal = workoutGoals.find { it.isActive }
     
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+            containerColor = if (workoutState == WorkoutState.ACTIVE) 
+                MaterialTheme.colorScheme.primaryContainer 
+            else 
+                MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(
             modifier = Modifier
@@ -57,76 +50,85 @@ fun WorkoutStartCard(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Title
             Text(
-                text = if (workoutState == WorkoutState.ACTIVE) "Workout in Progress" else "Ready to Start",
+                text = if (workoutState == WorkoutState.ACTIVE) "Workout in Progress" else "Start Workout",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface
+                modifier = Modifier.padding(bottom = 16.dp)
             )
             
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Timer display
-            Text(
-                text = viewModel.formatDuration(workoutDuration),
-                style = MaterialTheme.typography.displayMedium,
-                fontWeight = FontWeight.Bold,
-                color = if (workoutState == WorkoutState.ACTIVE) 
-                    MaterialTheme.colorScheme.primary 
-                else 
-                    MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Control buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                if (workoutState == WorkoutState.IDLE) {
-                    Button(
-                        onClick = onStartWorkout,
-                        modifier = Modifier.size(80.dp),
-                        shape = RoundedCornerShape(40.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = "Start Workout",
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                } else {
-                    Button(
-                        onClick = onStopWorkout,
-                        modifier = Modifier.size(80.dp),
-                        shape = RoundedCornerShape(40.dp),
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Stop,
-                            contentDescription = "Stop Workout",
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                }
+            // Active exercise info
+            if (workoutState == WorkoutState.ACTIVE && activeGoal != null) {
+                Text(
+                    text = "Current: ${activeGoal.exercise.name}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            // Timer display
+            if (workoutState == WorkoutState.ACTIVE) {
+                Text(
+                    text = viewModel.formatDuration(workoutDuration),
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+            } else {
+                Text(
+                    text = "00:00",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+            }
             
-            Text(
-                text = if (workoutState == WorkoutState.ACTIVE) 
-                    "Tap stop to end your workout" 
-                else 
-                    "Tap start to begin tracking your workout",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
+            // Start/Stop button
+            Button(
+                onClick = if (workoutState == WorkoutState.ACTIVE) onStopWorkout else onStartWorkout,
+                enabled = if (workoutState == WorkoutState.ACTIVE) true else enabled,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (workoutState == WorkoutState.ACTIVE) 
+                        MaterialTheme.colorScheme.error 
+                    else 
+                        MaterialTheme.colorScheme.primary
+                ),
+                modifier = Modifier
+                    .height(56.dp)
+                    .fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = if (workoutState == WorkoutState.ACTIVE) Icons.Default.Stop else Icons.Default.PlayArrow,
+                    contentDescription = if (workoutState == WorkoutState.ACTIVE) "Stop Workout" else "Start Workout",
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (workoutState == WorkoutState.ACTIVE) "Stop Workout" else "Start Workout",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            // Info text
+            if (workoutState == WorkoutState.IDLE) {
+                Text(
+                    text = if (workoutGoals.isNotEmpty()) 
+                        "Tap to start your workout goals" 
+                    else 
+                        "Add workout goals below to enable workout tracking",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
         }
     }
 }

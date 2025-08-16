@@ -68,13 +68,13 @@ fun MainScreen() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = BottomNavItem.Goals.route,
+            startDestination = BottomNavItem.Tracker.route,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(BottomNavItem.Goals.route) { GoalManagerScreen() }
             composable(BottomNavItem.Meals.route) { MealPlanScreen() }
             composable(BottomNavItem.Summary.route) { WorkoutSummaryScreen() }
-            composable(BottomNavItem.Tracker.route) { WorkoutTrackerScreen() }
+            composable(BottomNavItem.Tracker.route) { WorkoutTrackerScreen(navController) }
         }
     }
 }

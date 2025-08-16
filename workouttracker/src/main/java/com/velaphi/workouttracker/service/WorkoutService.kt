@@ -11,10 +11,11 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.velaphi.workouttracker.MainActivity
-import com.velaphi.workouttracker.R
+import com.velaphi.core.data.WorkoutExerciseRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -25,16 +26,21 @@ class WorkoutService : Service() {
     companion object {
         const val CHANNEL_ID = "workout_channel"
         const val NOTIFICATION_ID = 1
-        const val ACTION_START_WORKOUT = "start_workout"
-        const val ACTION_STOP_WORKOUT = "stop_workout"
+        const val ACTION_START_WORKOUT = "com.velaphi.workouttracker.START_WORKOUT"
+        const val ACTION_STOP_WORKOUT = "com.velaphi.workouttracker.STOP_WORKOUT"
         const val EXTRA_WORKOUT_DURATION = "workout_duration"
+        const val EXTRA_EXERCISE_ID = "exercise_id"
+        
+        // SharedPreferences keys
+        const val PREF_WORKOUT_ACTIVE = "workout_active"
+        const val PREF_WORKOUT_START_TIME = "workout_start_time"
+        const val PREF_ACTIVE_EXERCISE_ID = "active_exercise_id"
     }
     
+    private val serviceScope = CoroutineScope(Dispatchers.Main)
     private var workoutJob: Job? = null
     private var workoutStartTime: Long = 0
-    private var currentDuration: Long = 0
-    
-    private val serviceScope = CoroutineScope(Dispatchers.Main)
+    private var currentExerciseId: String? = null
     
     override fun onCreate() {
         super.onCreate()
@@ -43,76 +49,147 @@ class WorkoutService : Service() {
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ACTION_START_WORKOUT -> startWorkout()
-            ACTION_STOP_WORKOUT -> stopWorkout()
+            ACTION_START_WORKOUT -> {
+                val exerciseId = intent.getStringExtra(EXTRA_EXERCISE_ID)
+                startWorkout(exerciseId)
+            }
+            ACTION_STOP_WORKOUT -> {
+                stopWorkout()
+            }
         }
+        
+        // If service is restarted by system, check if we need to resume workout
+        if (intent?.action == null) {
+            checkAndResumeWorkout()
+        }
+        
         return START_STICKY
     }
     
-    private fun startWorkout() {
+    private fun startWorkout(exerciseId: String?) {
+        currentExerciseId = exerciseId
         workoutStartTime = System.currentTimeMillis()
-        startForeground(NOTIFICATION_ID, createNotification(0))
         
-        workoutJob = serviceScope.launch {
-            while (isActive) {
-                currentDuration = System.currentTimeMillis() - workoutStartTime
-                updateNotification(currentDuration)
-                delay(1000) // Update every second
-            }
-        }
+        // Save workout state
+        val prefs = getSharedPreferences("workout_prefs", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(PREF_WORKOUT_ACTIVE, true)
+            .putLong(PREF_WORKOUT_START_TIME, workoutStartTime)
+            .putString(PREF_ACTIVE_EXERCISE_ID, exerciseId)
+            .apply()
+        
+        // Start foreground service
+        startForeground(NOTIFICATION_ID, createNotification())
+        
+        // Start workout timer
+        startWorkoutTimer()
     }
     
     private fun stopWorkout() {
         workoutJob?.cancel()
+        workoutJob = null
+        
+        // Clear workout state
+        val prefs = getSharedPreferences("workout_prefs", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(PREF_WORKOUT_ACTIVE, false)
+            .putLong(PREF_WORKOUT_START_TIME, 0)
+            .putString(PREF_ACTIVE_EXERCISE_ID, null)
+            .apply()
+        
+        // Stop foreground service
         stopForeground(true)
         stopSelf()
     }
     
-    private fun createNotification(duration: Long): Notification {
-        val intent = Intent(this, MainActivity::class.java)
+    private fun startWorkoutTimer() {
+        workoutJob = serviceScope.launch {
+            while (isActive) {
+                delay(1000) // Update every second
+                updateNotification()
+            }
+        }
+    }
+    
+    private fun checkAndResumeWorkout() {
+        val prefs = getSharedPreferences("workout_prefs", Context.MODE_PRIVATE)
+        val isActive = prefs.getBoolean(PREF_WORKOUT_ACTIVE, false)
+        val startTime = prefs.getLong(PREF_WORKOUT_START_TIME, 0)
+        val exerciseId = prefs.getString(PREF_ACTIVE_EXERCISE_ID, null)
+        
+        if (isActive && startTime > 0) {
+            currentExerciseId = exerciseId
+            workoutStartTime = startTime
+            
+            // Resume foreground service
+            startForeground(NOTIFICATION_ID, createNotification())
+            
+            // Resume workout timer
+            startWorkoutTimer()
+        }
+    }
+    
+    private fun createNotification(): Notification {
+        val exerciseName = currentExerciseId?.let { id ->
+            WorkoutExerciseRepository.getWorkoutExercises().find { it.id == id }?.name
+        } ?: "Workout"
+        
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        
         val pendingIntent = PendingIntent.getActivity(
             this, 0, intent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        val stopIntent = Intent(this, WorkoutService::class.java).apply {
-            action = ACTION_STOP_WORKOUT
-        }
-        val stopPendingIntent = PendingIntent.getService(
-            this, 0, stopIntent,
-            PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Workout in Progress")
-            .setContentText(formatDuration(duration))
-            .setSmallIcon(R.drawable.ic_workout)
+            .setContentTitle("$exerciseName in Progress")
+            .setContentText("Tap to open app")
+            .setSmallIcon(android.R.drawable.ic_media_play)
             .setContentIntent(pendingIntent)
-            .addAction(R.drawable.ic_stop, "Stop", stopPendingIntent)
             .setOngoing(true)
+            .setAutoCancel(false)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
     }
     
-    private fun updateNotification(duration: Long) {
+    private fun updateNotification() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(NOTIFICATION_ID, createNotification(duration))
+        notificationManager.notify(NOTIFICATION_ID, createNotification())
     }
     
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Workout Tracker",
+                "Workout Service",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Tracks active workout sessions"
+                description = "Shows workout progress"
+                setShowBadge(false)
+                enableLights(false)
+                enableVibration(false)
             }
+            
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }
     
-    private fun formatDuration(duration: Long): String {
+    override fun onBind(intent: Intent?): IBinder? = null
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceScope.cancel()
+    }
+    
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        // Don't stop the service when app is removed from recent tasks
+    }
+    
+    fun formatDuration(duration: Long): String {
         val hours = TimeUnit.MILLISECONDS.toHours(duration)
         val minutes = TimeUnit.MILLISECONDS.toMinutes(duration) % 60
         val seconds = TimeUnit.MILLISECONDS.toSeconds(duration) % 60
@@ -122,12 +199,5 @@ class WorkoutService : Service() {
         } else {
             String.format("%02d:%02d", minutes, seconds)
         }
-    }
-    
-    override fun onBind(intent: Intent?): IBinder? = null
-    
-    override fun onDestroy() {
-        super.onDestroy()
-        workoutJob?.cancel()
     }
 }

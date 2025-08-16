@@ -62,12 +62,22 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.material.icons.extended)
     
+    // Lifecycle
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-common-java8:2.7.0")
+    
     // Dependency Injection
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+    
+    // Foreground Service Support
+    implementation("androidx.core:core-ktx:1.12.0")
+    
+    // Material3 Components
+    implementation("androidx.compose.material3:material3:1.2.0")
     
     // Testing
     testImplementation(libs.junit)
