@@ -1,37 +1,36 @@
-package com.velaphi.workouttracker
+package com.velaphi.core.viewmodel
 
 import android.content.Context
-import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.velaphi.core.data.WorkoutExercise
 import com.velaphi.core.data.WorkoutGoal
 import com.velaphi.core.data.WorkoutGoalRepository
-import com.velaphi.workouttracker.service.WorkoutService
+import com.velaphi.core.domain.WorkoutState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-class WorkoutViewModel : ViewModel() {
+abstract class WorkoutViewModel : ViewModel() {
     
-    private val _workoutState = MutableStateFlow(WorkoutState.IDLE)
+    protected val _workoutState = MutableStateFlow(WorkoutState.IDLE)
     val workoutState: StateFlow<WorkoutState> = _workoutState.asStateFlow()
     
-    private val _workoutDuration = MutableStateFlow(0L)
+    protected val _workoutDuration = MutableStateFlow(0L)
     val workoutDuration: StateFlow<Long> = _workoutDuration.asStateFlow()
     
-    private val _selectedExercises = MutableStateFlow<List<WorkoutExercise>>(emptyList())
+    protected val _selectedExercises = MutableStateFlow<List<WorkoutExercise>>(emptyList())
     val selectedExercises: StateFlow<List<WorkoutExercise>> = _selectedExercises.asStateFlow()
     
-    private val _workoutGoals = MutableStateFlow<List<WorkoutGoal>>(emptyList())
+    protected val _workoutGoals = MutableStateFlow<List<WorkoutGoal>>(emptyList())
     val workoutGoals: StateFlow<List<WorkoutGoal>> = _workoutGoals.asStateFlow()
     
-    private var timerJob: kotlinx.coroutines.Job? = null
-    private var workoutStartTime: Long = 0
-    private var goalRepository: WorkoutGoalRepository? = null
-    private var goalsObserverJob: kotlinx.coroutines.Job? = null
+    protected var timerJob: kotlinx.coroutines.Job? = null
+    protected var workoutStartTime: Long = 0
+    protected var goalRepository: WorkoutGoalRepository? = null
+    protected var goalsObserverJob: kotlinx.coroutines.Job? = null
     
     // Getter for goalRepository (for testing purposes)
     val goalRepositoryForTesting: WorkoutGoalRepository?
@@ -59,45 +58,6 @@ class WorkoutViewModel : ViewModel() {
         goalRepository?.refreshGoals()
     }
     
-    fun startWorkout(context: Context, exercise: WorkoutExercise? = null) {
-        // If no specific exercise is provided, use the first selected goal
-        val targetExercise = exercise ?: _workoutGoals.value.firstOrNull { it.isSelected }?.exercise
-        
-        if (targetExercise != null) {
-            // Set this goal as active
-            goalRepository?.setActiveGoal(targetExercise)
-            
-            val intent = Intent(context, WorkoutService::class.java).apply {
-                action = WorkoutService.ACTION_START_WORKOUT
-                putExtra(WorkoutService.EXTRA_EXERCISE_ID, targetExercise.id)
-            }
-            context.startForegroundService(intent)
-            _workoutState.value = WorkoutState.ACTIVE
-            workoutStartTime = System.currentTimeMillis()
-            startDurationTimer()
-            
-            // Goals will be automatically updated via observeGoals()
-        }
-    }
-    
-    fun stopWorkout(context: Context) {
-        val intent = Intent(context, WorkoutService::class.java).apply {
-            action = WorkoutService.ACTION_STOP_WORKOUT
-        }
-        context.startService(intent)
-        _workoutState.value = WorkoutState.IDLE
-        _workoutDuration.value = 0L
-        workoutStartTime = 0
-        timerJob?.cancel()
-        timerJob = null
-        
-        // Clear active goal
-        goalRepository?.clearActiveGoal()
-        // Goals will be automatically updated via observeGoals()
-    }
-    
-
-    
     fun selectExercise(exercise: WorkoutExercise) {
         val currentSelected = _selectedExercises.value.toMutableList()
         if (!currentSelected.any { it.id == exercise.id }) {
@@ -121,45 +81,7 @@ class WorkoutViewModel : ViewModel() {
         // Goals will be automatically updated via observeGoals()
     }
     
-    fun checkWorkoutStatus(context: Context) {
-        val prefs = context.getSharedPreferences("workout_prefs", Context.MODE_PRIVATE)
-        val isActive = prefs.getBoolean(WorkoutService.PREF_WORKOUT_ACTIVE, false)
-        val startTime = prefs.getLong(WorkoutService.PREF_WORKOUT_START_TIME, 0)
-        
-        if (isActive && startTime > 0) {
-            _workoutState.value = WorkoutState.ACTIVE
-            workoutStartTime = startTime
-            val currentDuration = System.currentTimeMillis() - startTime
-            _workoutDuration.value = currentDuration
-            
-            // Only start timer if it's not already running
-            if (timerJob?.isActive != true) {
-                startDurationTimer()
-            }
-        } else {
-            _workoutState.value = WorkoutState.IDLE
-            _workoutDuration.value = 0L
-            workoutStartTime = 0
-            timerJob?.cancel()
-            timerJob = null
-        }
-    }
-    
-    fun syncWithService(context: Context) {
-        if (_workoutState.value == WorkoutState.ACTIVE) {
-            val prefs = context.getSharedPreferences("workout_prefs", Context.MODE_PRIVATE)
-            val startTime = prefs.getLong(WorkoutService.PREF_WORKOUT_START_TIME, 0)
-            if (startTime > 0) {
-                workoutStartTime = startTime
-                val currentDuration = System.currentTimeMillis() - startTime
-                _workoutDuration.value = currentDuration
-            }
-        }
-    }
-    
-
-    
-    private fun observeGoals() {
+    protected fun observeGoals() {
         goalRepository?.let { repo ->
             // Cancel any existing observation
             goalsObserverJob?.cancel()
@@ -175,7 +97,7 @@ class WorkoutViewModel : ViewModel() {
         }
     }
     
-    private fun startDurationTimer() {
+    protected fun startDurationTimer() {
         // Cancel existing timer if running
         timerJob?.cancel()
         
@@ -207,9 +129,4 @@ class WorkoutViewModel : ViewModel() {
         timerJob?.cancel()
         goalsObserverJob?.cancel()
     }
-}
-
-enum class WorkoutState {
-    IDLE,
-    ACTIVE
 }

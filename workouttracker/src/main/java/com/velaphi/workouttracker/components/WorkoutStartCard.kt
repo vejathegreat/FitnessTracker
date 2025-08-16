@@ -16,8 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.velaphi.workouttracker.WorkoutState
-import com.velaphi.workouttracker.WorkoutViewModel
+import com.velaphi.core.domain.WorkoutState
+import com.velaphi.core.viewmodel.WorkoutViewModel
 import com.velaphi.core.data.WorkoutGoal
 
 @Composable

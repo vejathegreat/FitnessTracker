@@ -1,11 +1,6 @@
 package com.velaphi.fitnesstracker
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Assessment
-import androidx.compose.material.icons.filled.Fastfood
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -14,7 +9,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,13 +18,7 @@ import com.velaphi.workouttracker.WorkoutTrackerScreen
 import com.velaphi.workoutsummary.WorkoutSummaryScreen
 import com.velaphi.goalmanager.GoalManagerScreen
 import com.velaphi.mealplan.MealPlanScreen
-
-sealed class BottomNavItem(val label: String, val route: String, val icon: ImageVector) {
-    object Goals : BottomNavItem("Goals", "goals", Icons.Default.Flag)
-    object Meals : BottomNavItem("Meals", "meals", Icons.Default.Fastfood)
-    object Summary : BottomNavItem("Summary", "summary", Icons.Default.Assessment)
-    object Tracker : BottomNavItem("Tracker", "tracker", Icons.Default.FitnessCenter)
-}
+import com.velaphi.core.navigation.BottomNavItem
 
 @Composable
 fun MainScreen() {

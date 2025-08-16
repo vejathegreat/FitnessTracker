@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.velaphi.workouttracker.WorkoutState
+import com.velaphi.core.domain.WorkoutState
 import com.velaphi.core.data.WorkoutGoal
 import com.velaphi.core.data.WorkoutExercise
 

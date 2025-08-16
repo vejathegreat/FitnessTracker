@@ -34,13 +34,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.navigation.NavController
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
+import com.velaphi.core.domain.WorkoutState
 
 @Composable
 fun WorkoutTrackerScreen(navController: NavController? = null) {
-    val viewModel: WorkoutViewModel = viewModel()
+    val viewModel: WorkoutTrackerViewModel = viewModel()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     
