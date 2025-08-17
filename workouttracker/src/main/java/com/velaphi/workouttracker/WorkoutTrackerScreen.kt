@@ -16,15 +16,18 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.velaphi.workouttracker.components.WorkoutStartCard
-import com.velaphi.workouttracker.components.WorkoutGoalsList
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.navigation.NavController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Star
 import com.velaphi.core.domain.WorkoutState
 import com.velaphi.workouttracker.components.WorkoutCompletionDialog
+import com.velaphi.core.data.WorkoutGoal
+import com.velaphi.core.data.WorkoutExercise
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -40,6 +43,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
 import androidx.core.content.ContextCompat
+import androidx.compose.material3.Icon
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -125,8 +129,6 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
             return@DisposableEffect onDispose { }
         }
         
-
-        
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent?.action == "com.velaphi.workouttracker.WORKOUT_STOPPED") {
@@ -184,22 +186,21 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Header
         Text(
             text = "Workout Tracker",
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 8.dp)
         )
         
         // Notification permission status
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                 )
@@ -219,7 +220,7 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = "Notification permission requested",
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -232,28 +233,41 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
             onStopWorkout = {
                 viewModel.stopWorkout(context)
             },
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.fillMaxWidth()
         )
         
-        // Workout Goals List (if goals are set)
+        // Workout Goals Section
         if (workoutGoals.isNotEmpty()) {
-            WorkoutGoalsList(
-                goals = workoutGoals,
-                workoutState = workoutState,
-                onStartWorkout = { exercise ->
-                    viewModel.startWorkout(context, exercise)
-                },
-                onStopWorkout = {
-                    viewModel.stopWorkout(context)
-                },
-                modifier = Modifier.padding(bottom = 16.dp)
+            Text(
+                text = "Your Workout Goals",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 8.dp)
             )
+            
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                workoutGoals.forEach { goal ->
+                    WorkoutGoalCard(
+                        goal = goal,
+                        workoutState = workoutState,
+                        onStartWorkout = { exercise ->
+                            viewModel.startWorkout(context, exercise)
+                        },
+                        onStopWorkout = {
+                            viewModel.stopWorkout(context)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
         } else {
             // No goals selected - show clickable placeholder to add goals
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
                     .clickable {
                         if (navController != null) {
                             // Instead of programmatic navigation, just refresh goals
@@ -265,7 +279,7 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
                         }
                     },
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                 )
             ) {
                 Column(
@@ -274,36 +288,42 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Navigate to Goals",
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = if (navController != null) {
                             "➕ Add Workout Goals"
                         } else {
-                            "➕ Refresh Goals"
+                            "➕ Add Workout Goals"
                         },
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = if (navController != null) {
-                            "Use the Goals tab below to select exercises"
+                            "Use the Goals tab below to select exercises and create your workout plan"
                         } else {
-                            "Tap to refresh goals from storage"
+                            "Select exercises below to create your workout plan"
                         },
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    if (navController != null) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Use Goals tab below",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "↓ Use bottom navigation tabs ↓",
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
                 }
             }
         }
@@ -336,5 +356,101 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
                 showCompletionDialogState.value = false
             }
         )
+    }
+}
+
+@Composable
+private fun WorkoutGoalCard(
+    goal: WorkoutGoal,
+    workoutState: WorkoutState,
+    onStartWorkout: (WorkoutExercise) -> Unit,
+    onStopWorkout: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isActive = goal.isActive && workoutState == WorkoutState.ACTIVE
+    
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = if (isActive) MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Priority indicator
+            if (goal.priority > 0) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = "Priority ${goal.priority}",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            
+            // Exercise details
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = goal.exercise.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = goal.exercise.category.name.replace("_", " "),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (goal.priority > 0) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Priority ${goal.priority}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            
+            // Start/Stop button
+            Button(
+                onClick = {
+                    if (isActive) {
+                        onStopWorkout()
+                    } else {
+                        onStartWorkout(goal.exercise)
+                    }
+                },
+                enabled = if (workoutState == WorkoutState.ACTIVE) isActive else true,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isActive) MaterialTheme.colorScheme.error
+                    else if (workoutState == WorkoutState.ACTIVE) MaterialTheme.colorScheme.surfaceVariant
+                    else MaterialTheme.colorScheme.primary
+                ),
+                modifier = Modifier.height(40.dp)
+            ) {
+                Icon(
+                    imageVector = if (isActive) Icons.Default.Stop else Icons.Default.PlayArrow,
+                    contentDescription = if (isActive) "Stop" else "Start",
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = if (isActive) "Stop" else "Start",
+                    color = if (workoutState == WorkoutState.ACTIVE && !isActive) 
+                        MaterialTheme.colorScheme.onSurfaceVariant 
+                    else 
+                        MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
     }
 }

@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.velaphi.core.data.ExerciseCategory
 import com.velaphi.core.data.WorkoutExercise
 import com.velaphi.core.data.WorkoutExerciseRepository
@@ -37,29 +36,29 @@ fun GoalManagerScreen() {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Header
         Text(
             text = "Exercise Goals & Selection",
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 8.dp)
         )
         
         // Category Filter Section
         Text(
             text = "Filter by Category:",
-            fontSize = 16.sp,
+            style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(vertical = 8.dp)
         )
         
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
-                .padding(bottom = 16.dp),
+                .height(50.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item {
@@ -90,9 +89,9 @@ fun GoalManagerScreen() {
         // Available Exercises Section
         Text(
             text = "Available Exercises:",
-            fontSize = 18.sp,
+            style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(vertical = 8.dp)
         )
         
         LazyColumn(
@@ -138,10 +137,10 @@ private fun AvailableExerciseCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+            containerColor = if (isSelected) MaterialTheme.colorScheme.surfaceVariant
             else MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
@@ -155,31 +154,31 @@ private fun AvailableExerciseCard(
             ) {
                 Text(
                     text = exercise.name,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = exercise.category.name.replace("_", " "),
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     exercise.muscleGroups.take(3).forEach { muscleGroup ->
-                        Text(
-                            text = muscleGroup.name.replace("_", " "),
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .background(
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = MaterialTheme.shapes.small
-                                )
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
+                        Surface(
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                            shape = MaterialTheme.shapes.small
+                        ) {
+                            Text(
+                                text = muscleGroup.name.replace("_", " "),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
                     }
                 }
             }

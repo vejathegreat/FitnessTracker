@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.velaphi.core.domain.WorkoutState
 import com.velaphi.core.data.WorkoutGoal
 import com.velaphi.core.data.WorkoutExercise
@@ -31,29 +30,18 @@ fun WorkoutGoalsList(
 ) {
     if (goals.isEmpty()) return
     
-    Column(modifier = modifier) {
-        Text(
-            text = "Your Workout Goals",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-        )
-        
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 300.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(goals) { goal ->
-                WorkoutGoalCard(
-                    goal = goal,
-                    workoutState = workoutState,
-                    onStartWorkout = onStartWorkout,
-                    onStopWorkout = onStopWorkout
-                )
-            }
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(goals) { goal ->
+            WorkoutGoalCard(
+                goal = goal,
+                workoutState = workoutState,
+                onStartWorkout = onStartWorkout,
+                onStopWorkout = onStopWorkout
+            )
         }
     }
 }
@@ -71,9 +59,9 @@ private fun WorkoutGoalCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = if (isActive) MaterialTheme.colorScheme.primaryContainer
-            else MaterialTheme.colorScheme.surface
+            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
@@ -98,20 +86,20 @@ private fun WorkoutGoalCard(
             ) {
                 Text(
                     text = goal.exercise.name,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = goal.exercise.category.name.replace("_", " "),
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (goal.priority > 0) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Priority ${goal.priority}",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
                     )
