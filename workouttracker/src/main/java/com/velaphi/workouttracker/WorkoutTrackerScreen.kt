@@ -37,6 +37,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import com.velaphi.core.domain.WorkoutState
+import com.velaphi.workouttracker.components.WorkoutCompletionDialog
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 
 @Composable
 fun WorkoutTrackerScreen(navController: NavController? = null) {
@@ -44,13 +47,25 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     
-    val selectedExercises by viewModel.selectedExercises.collectAsState()
     val workoutGoals by viewModel.workoutGoals.collectAsState()
     val workoutState by viewModel.workoutState.collectAsState()
+    
+    // Workout completion dialog state
+    val lastWorkoutData by viewModel.lastWorkoutData.collectAsState()
+    val showCompletionDialogState = remember { mutableStateOf(false) }
+    val showCompletionDialog by showCompletionDialogState
+    
+    // Show completion dialog when workout data is available
+    LaunchedEffect(lastWorkoutData) {
+        if (lastWorkoutData != null) {
+            showCompletionDialogState.value = true
+        }
+    }
     
     // Initialize repository and check workout status
     LaunchedEffect(Unit) {
         viewModel.initializeRepository(context)
+        viewModel.initializeSessionRepository(context)
         viewModel.checkWorkoutStatus(context)
     }
     
@@ -182,12 +197,7 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
         }
         
         // Selected Exercises Summary
-        SelectedExercisesSummary(
-            selectedExercises = selectedExercises,
-            onExerciseRemoved = { exercise ->
-                viewModel.deselectExercise(exercise)
-            }
-        )
+        // Removed as per edit hint
         
         // Note: Exercise selection and filtering has been moved to the Goal Manager screen
         Text(
@@ -199,6 +209,23 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+        )
+    }
+    
+    // Workout Completion Dialog
+    if (showCompletionDialog && lastWorkoutData != null) {
+        WorkoutCompletionDialog(
+            exerciseName = lastWorkoutData!!.exerciseName,
+            duration = lastWorkoutData!!.duration,
+            caloriesBurned = lastWorkoutData!!.caloriesBurned,
+            onDismiss = {
+                showCompletionDialogState.value = false
+                viewModel.clearLastWorkoutData()
+            },
+            onComplete = { session ->
+                viewModel.saveWorkoutSession(session)
+                showCompletionDialogState.value = false
+            }
         )
     }
 }
