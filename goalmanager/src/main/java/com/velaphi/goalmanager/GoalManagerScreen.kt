@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import com.velaphi.core.data.ExerciseCategory
 import com.velaphi.core.data.WorkoutExercise
 import com.velaphi.core.data.WorkoutExerciseRepository
@@ -41,7 +42,7 @@ fun GoalManagerScreen() {
     ) {
         // Header
         Text(
-            text = "Exercise Goals & Selection",
+            text = stringResource(R.string.exercise_goals_and_selection),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -49,7 +50,7 @@ fun GoalManagerScreen() {
         
         // Category Filter Section
         Text(
-            text = "Filter by Category:",
+            text = stringResource(R.string.filter_by_category),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 8.dp)
@@ -69,7 +70,7 @@ fun GoalManagerScreen() {
                         else MaterialTheme.colorScheme.surfaceVariant
                     )
                 ) {
-                    Text("All")
+                    Text(stringResource(R.string.all))
                 }
             }
             
@@ -88,7 +89,7 @@ fun GoalManagerScreen() {
         
         // Available Exercises Section
         Text(
-            text = "Available Exercises:",
+            text = stringResource(R.string.available_exercises),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 8.dp)
@@ -194,11 +195,11 @@ private fun AvailableExerciseCard(
             ) {
                 Icon(
                     imageVector = if (isSelected) Icons.Default.Remove else Icons.Default.Add,
-                    contentDescription = if (isSelected) "Remove Goal" else "Add as Goal",
+                    contentDescription = if (isSelected) stringResource(R.string.remove_goal_description) else stringResource(R.string.add_goal_description),
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(if (isSelected) "Remove" else "Add Goal")
+                Text(if (isSelected) stringResource(R.string.remove) else stringResource(R.string.add_goal))
             }
         }
     }

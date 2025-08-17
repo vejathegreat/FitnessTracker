@@ -44,6 +44,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
 import androidx.core.content.ContextCompat
 import androidx.compose.material3.Icon
+import androidx.compose.ui.res.stringResource
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -125,7 +126,7 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
     DisposableEffect(Unit) {
         // Only register receiver if we have a valid context, the app is active, and there might be an active workout
         if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-            println("WorkoutTrackerScreen: Context is null or app not active, skipping receiver registration")
+            println("WorkoutTrackerScreen: Context null, skipping receiver registration.")
             return@DisposableEffect onDispose { }
         }
         
@@ -144,7 +145,7 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 // For API 33+, use the new flag
                 context.registerReceiver(receiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED)
-                println("WorkoutTrackerScreen: Broadcast receiver registered successfully with RECEIVER_NOT_EXPORTED")
+                println("WorkoutTrackerScreen: Broadcast receiver registered successfully.")
             } else {
                 // For older versions, use the old method
                 ContextCompat.registerReceiver(
@@ -153,7 +154,7 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
                     filter,
                     ContextCompat.RECEIVER_NOT_EXPORTED
                 )
-                println("WorkoutTrackerScreen: Broadcast receiver registered successfully with old method")
+                println("WorkoutTrackerScreen: Broadcast receiver registered using old method.")
             }
         } catch (e: Exception) {
             // Fallback to old method if new method fails
@@ -165,16 +166,16 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
                     filter,
                     ContextCompat.RECEIVER_NOT_EXPORTED
                 )
-                println("WorkoutTrackerScreen: Fallback receiver registration successful")
+                println("WorkoutTrackerScreen: Fallback receiver registration successful.")
             } catch (fallbackException: Exception) {
-                println("WorkoutTrackerScreen: Failed to register receiver even with fallback: ${fallbackException.message}")
+                println("WorkoutTrackerScreen: Failed to register receiver fallback: ${fallbackException.message}")
             }
         }
         
         onDispose {
             try {
                 context.unregisterReceiver(receiver)
-                println("WorkoutTrackerScreen: Broadcast receiver unregistered successfully")
+                println("WorkoutTrackerScreen: Broadcast receiver unregistered successfully.")
             } catch (e: Exception) {
                 println("WorkoutTrackerScreen: Error unregistering receiver: ${e.message}")
             }
@@ -191,7 +192,7 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
     ) {
         // Header
         Text(
-            text = "Workout Tracker",
+            text = stringResource(R.string.workout_tracker_title),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -213,13 +214,13 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications",
+                        contentDescription = stringResource(R.string.notifications),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "Notification permission requested",
+                        text = stringResource(R.string.notification_permission_requested),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -239,7 +240,7 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
         // Workout Goals Section
         if (workoutGoals.isNotEmpty()) {
             Text(
-                text = "Your Workout Goals",
+                text = stringResource(R.string.your_workout_goals),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 8.dp)
@@ -265,6 +266,18 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
             }
         } else {
             // No goals selected - show clickable placeholder to add goals
+            val addGoalsText = if (navController != null) {
+                stringResource(R.string.add_workout_goals)
+            } else {
+                stringResource(R.string.add_workout_goals)
+            }
+            
+            val addGoalsDescription = if (navController != null) {
+                stringResource(R.string.use_goals_tab_below)
+            } else {
+                stringResource(R.string.select_exercises_below)
+            }
+            
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -290,17 +303,13 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Navigate to Goals",
+                        contentDescription = stringResource(R.string.navigate_to_goals),
                         modifier = Modifier.size(48.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = if (navController != null) {
-                            "➕ Add Workout Goals"
-                        } else {
-                            "➕ Add Workout Goals"
-                        },
+                        text = addGoalsText,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
@@ -308,18 +317,14 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = if (navController != null) {
-                            "Use the Goals tab below to select exercises and create your workout plan"
-                        } else {
-                            "Select exercises below to create your workout plan"
-                        },
+                        text = addGoalsDescription,
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "↓ Use bottom navigation tabs ↓",
+                        text = stringResource(R.string.use_bottom_navigation_tabs),
                         style = MaterialTheme.typography.bodySmall,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
@@ -329,12 +334,14 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
         }
         
         // Note: Exercise selection and filtering has been moved to the Goal Manager screen
+        val tipText = if (navController != null) {
+            stringResource(R.string.tip_use_goals_tab)
+        } else {
+            stringResource(R.string.tip_go_to_goal_manager)
+        }
+        
         Text(
-            text = if (navController != null) {
-                "💡 Tip: Use the Goals tab below to select exercises. The Tracker tab will show your selected goals."
-            } else {
-                "💡 Tip: Go to Goal Manager to select and filter exercises for your workout goals"
-            },
+            text = tipText,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
@@ -387,7 +394,7 @@ private fun WorkoutGoalCard(
             if (goal.priority > 0) {
                 Icon(
                     imageVector = Icons.Default.Star,
-                    contentDescription = "Priority ${goal.priority}",
+                    contentDescription = stringResource(R.string.priority, goal.priority),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
@@ -412,7 +419,7 @@ private fun WorkoutGoalCard(
                 if (goal.priority > 0) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Priority ${goal.priority}",
+                        text = stringResource(R.string.priority, goal.priority),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
@@ -439,12 +446,12 @@ private fun WorkoutGoalCard(
             ) {
                 Icon(
                     imageVector = if (isActive) Icons.Default.Stop else Icons.Default.PlayArrow,
-                    contentDescription = if (isActive) "Stop" else "Start",
+                    contentDescription = if (isActive) stringResource(R.string.stop) else stringResource(R.string.start),
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = if (isActive) "Stop" else "Start",
+                    text = if (isActive) stringResource(R.string.stop) else stringResource(R.string.start),
                     color = if (workoutState == WorkoutState.ACTIVE && !isActive) 
                         MaterialTheme.colorScheme.onSurfaceVariant 
                     else 

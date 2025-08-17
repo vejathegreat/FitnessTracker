@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.velaphi.core.domain.WorkoutState
 import com.velaphi.core.viewmodel.WorkoutViewModel
 import com.velaphi.core.data.WorkoutGoal
+import com.velaphi.workouttracker.R
 
 @Composable
 fun WorkoutStartCard(
@@ -46,7 +48,7 @@ fun WorkoutStartCard(
         ) {
             // Title
             Text(
-                text = if (workoutState == WorkoutState.ACTIVE) "Workout in Progress" else "Workout Timer",
+                text = if (workoutState == WorkoutState.ACTIVE) stringResource(R.string.workout_in_progress) else stringResource(R.string.workout_timer),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -56,7 +58,7 @@ fun WorkoutStartCard(
             // Active exercise info
             if (workoutState == WorkoutState.ACTIVE && activeGoal != null) {
                 Text(
-                    text = "Current: ${activeGoal.exercise.name}",
+                    text = stringResource(R.string.current_exercise, activeGoal.exercise.name),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium,
@@ -75,7 +77,7 @@ fun WorkoutStartCard(
                 )
             } else {
                 Text(
-                    text = "00:00",
+                    text = stringResource(R.string.timer_default),
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
@@ -97,12 +99,12 @@ fun WorkoutStartCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Stop,
-                        contentDescription = "Stop Workout",
+                        contentDescription = stringResource(R.string.stop_workout),
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Stop Workout",
+                        text = stringResource(R.string.stop_workout),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -113,9 +115,9 @@ fun WorkoutStartCard(
             if (workoutState == WorkoutState.IDLE) {
                 Text(
                     text = if (workoutGoals.isNotEmpty()) 
-                        "Start your workout from the goals below" 
+                        stringResource(R.string.start_workout_from_goals)
                     else 
-                        "Add workout goals below to enable workout tracking",
+                        stringResource(R.string.add_workout_goals_below),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,

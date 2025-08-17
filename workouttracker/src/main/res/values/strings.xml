@@ -1,3 +1,42 @@
 <resources>
     <string name="app_name">WorkoutTracker</string>
+    
+    <!-- WorkoutTrackerScreen Strings -->
+    <string name="workout_tracker_title">Workout Tracker</string>
+    <string name="notifications">Notifications</string>
+    <string name="notification_permission_requested">Notification permission requested</string>
+    <string name="your_workout_goals">Your Workout Goals</string>
+    <string name="navigate_to_goals">Navigate to Goals</string>
+    <string name="add_workout_goals">➕ Add Workout Goals</string>
+    <string name="use_goals_tab_below">Use the Goals tab below to select exercises and create your workout plan</string>
+    <string name="select_exercises_below">Select exercises below to create your workout plan</string>
+    <string name="use_bottom_navigation_tabs">↓ Use bottom navigation tabs ↓</string>
+    <string name="tip_use_goals_tab">💡 Tip: Use the Goals tab below to select exercises. The Tracker tab will show your selected goals.</string>
+    <string name="tip_go_to_goal_manager">💡 Tip: Go to Goal Manager to select and filter exercises for your workout goals</string>
+    
+    <!-- WorkoutGoalCard Strings -->
+    <string name="priority">Priority %d</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="start_workout">Start Workout</string>
+    <string name="stop_workout">Stop Workout</string>
+    
+    <!-- WorkoutStartCard Strings -->
+    <string name="workout_in_progress">Workout in Progress</string>
+    <string name="workout_timer">Workout Timer</string>
+    <string name="current_exercise">Current: %s</string>
+    <string name="timer_default">00:00</string>
+    <string name="start_workout_from_goals">Start your workout from the goals below</string>
+    <string name="add_workout_goals_below">Add workout goals below to enable workout tracking</string>
+    
+    <!-- GoalManagerScreen Strings -->
+    <string name="exercise_goals_and_selection">Exercise Goals &amp; Selection</string>
+    <string name="filter_by_category">Filter by Category:</string>
+    <string name="all">All</string>
+    <string name="available_exercises">Available Exercises:</string>
+    <string name="add_goal">Add Goal</string>
+    <string name="remove">Remove</string>
+    <string name="add_as_goal">Add as Goal</string>
+    <string name="remove_goal_description">Remove Goal</string>
+    <string name="add_goal_description">Add as Goal</string>
 </resources>
