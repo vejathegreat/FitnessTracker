@@ -127,8 +127,10 @@ private fun WorkoutGoalCard(
                         onStartWorkout(goal.exercise)
                     }
                 },
+                enabled = if (workoutState == WorkoutState.ACTIVE) isActive else true,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (isActive) MaterialTheme.colorScheme.error
+                    else if (workoutState == WorkoutState.ACTIVE) MaterialTheme.colorScheme.surfaceVariant
                     else MaterialTheme.colorScheme.primary
                 ),
                 modifier = Modifier.height(40.dp)
@@ -139,7 +141,13 @@ private fun WorkoutGoalCard(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(if (isActive) "Stop" else "Start")
+                Text(
+                    text = if (isActive) "Stop" else "Start",
+                    color = if (workoutState == WorkoutState.ACTIVE && !isActive) 
+                        MaterialTheme.colorScheme.onSurfaceVariant 
+                    else 
+                        MaterialTheme.colorScheme.onPrimary
+                )
             }
         }
     }

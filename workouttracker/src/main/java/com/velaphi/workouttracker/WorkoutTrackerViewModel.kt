@@ -9,6 +9,7 @@ import com.velaphi.core.data.*
 import com.velaphi.workouttracker.service.WorkoutService
 import java.util.*
 import androidx.lifecycle.viewModelScope
+import com.velaphi.workouttracker.service.WorkoutNotificationHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,6 +19,7 @@ class WorkoutTrackerViewModel : WorkoutViewModel() {
     
     private var currentExercise: WorkoutExercise? = null
     private var sessionRepository: WorkoutSessionRepository? = null
+    private var notificationHelper: WorkoutNotificationHelper? = null
     
     private val _lastWorkoutData = MutableStateFlow<LastWorkoutData?>(null)
     val lastWorkoutData: StateFlow<LastWorkoutData?> = _lastWorkoutData.asStateFlow()
@@ -27,10 +29,20 @@ class WorkoutTrackerViewModel : WorkoutViewModel() {
             sessionRepository = WorkoutSessionRepository.getInstance(context)
             println("WorkoutTrackerViewModel: Initialized session repository")
         }
+        if (notificationHelper == null) {
+            notificationHelper = WorkoutNotificationHelper(context)
+            println("WorkoutTrackerViewModel: Initialized notification helper")
+        }
     }
     
     @RequiresApi(Build.VERSION_CODES.O)
     fun startWorkout(context: Context, exercise: WorkoutExercise? = null) {
+        // Check if a workout is already active
+        if (_workoutState.value == com.velaphi.core.domain.WorkoutState.ACTIVE) {
+            println("WorkoutTrackerViewModel: Workout already in progress, cannot start another")
+            return
+        }
+        
         // If no specific exercise is provided, use the first selected goal
         val targetExercise = exercise ?: _workoutGoals.value.firstOrNull { it.isSelected }?.exercise
         
@@ -50,7 +62,16 @@ class WorkoutTrackerViewModel : WorkoutViewModel() {
             _workoutState.value = com.velaphi.core.domain.WorkoutState.ACTIVE
             startDurationTimer()
             
+            // Start notification updates
+            startNotificationUpdates()
+            
+            // Show workout notification
+            notificationHelper?.showWorkoutInProgressNotification(targetExercise.name, 0L)
+            
+            println("WorkoutTrackerViewModel: Started workout for ${targetExercise.name}")
             // Goals will be automatically updated via observeGoals()
+        } else {
+            println("WorkoutTrackerViewModel: No exercise selected, cannot start workout")
         }
     }
     
@@ -60,6 +81,9 @@ class WorkoutTrackerViewModel : WorkoutViewModel() {
         }
         context.startService(intent)
         _workoutState.value = com.velaphi.core.domain.WorkoutState.IDLE
+        
+        // Dismiss workout notification
+        notificationHelper?.dismissWorkoutNotification()
         
         // Calculate workout duration
         val workoutDuration = if (workoutStartTime > 0) {
@@ -180,6 +204,23 @@ class WorkoutTrackerViewModel : WorkoutViewModel() {
                 workoutStartTime = startTime
                 val currentDuration = System.currentTimeMillis() - startTime
                 _workoutDuration.value = currentDuration
+            }
+        }
+    }
+    
+    // Start notification updates when workout starts
+    private fun startNotificationUpdates() {
+        viewModelScope.launch {
+            while (_workoutState.value == com.velaphi.core.domain.WorkoutState.ACTIVE) {
+                if (workoutStartTime > 0) {
+                    val currentDuration = System.currentTimeMillis() - workoutStartTime
+                    
+                    // Update notification with current duration
+                    currentExercise?.let { exercise ->
+                        notificationHelper?.showWorkoutInProgressNotification(exercise.name, currentDuration)
+                    }
+                }
+                kotlinx.coroutines.delay(1000)
             }
         }
     }

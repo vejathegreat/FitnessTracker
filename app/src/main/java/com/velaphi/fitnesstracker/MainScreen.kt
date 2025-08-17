@@ -21,15 +21,17 @@ import com.velaphi.mealplan.MealPlanScreen
 import com.velaphi.core.navigation.BottomNavItem
 
 @Composable
-fun MainScreen() {
-    val navController = rememberNavController()
+fun MainScreen(navController: androidx.navigation.NavHostController? = null) {
+    val internalNavController = rememberNavController()
+    val actualNavController = navController ?: internalNavController
+    
     val items = listOf(
         BottomNavItem.Tracker,
         BottomNavItem.Goals,
         BottomNavItem.Summary,
         BottomNavItem.Meals
     )
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val navBackStackEntry by actualNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
@@ -39,8 +41,8 @@ fun MainScreen() {
                     NavigationBarItem(
                         selected = currentRoute == item.route,
                         onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
+                            actualNavController.navigate(item.route) {
+                                popUpTo(actualNavController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
                                 launchSingleTop = true
@@ -55,14 +57,14 @@ fun MainScreen() {
         }
     ) { innerPadding ->
         NavHost(
-            navController = navController,
+            navController = actualNavController,
             startDestination = BottomNavItem.Tracker.route,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(BottomNavItem.Goals.route) { GoalManagerScreen() }
             composable(BottomNavItem.Meals.route) { MealPlanScreen() }
             composable(BottomNavItem.Summary.route) { WorkoutSummaryScreen() }
-            composable(BottomNavItem.Tracker.route) { WorkoutTrackerScreen(navController) }
+            composable(BottomNavItem.Tracker.route) { WorkoutTrackerScreen(actualNavController) }
         }
     }
 }

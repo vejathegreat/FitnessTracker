@@ -19,6 +19,14 @@
             android:exported="false"
             android:foregroundServiceType="specialUse" />
             
+        <receiver
+            android:name=".service.WorkoutNotificationReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.velaphi.workouttracker.STOP_WORKOUT" />
+            </intent-filter>
+        </receiver>
+            
         <activity
             android:name=".MainActivity"
             android:exported="true"

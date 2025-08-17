@@ -1,19 +1,10 @@
 package com.velaphi.workouttracker
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -25,11 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.velaphi.workouttracker.components.WorkoutStartCard
-import com.velaphi.workouttracker.components.SelectedExercisesSummary
 import com.velaphi.workouttracker.components.WorkoutGoalsList
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.navigation.NavController
@@ -38,9 +25,23 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import com.velaphi.core.domain.WorkoutState
 import com.velaphi.workouttracker.components.WorkoutCompletionDialog
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
+import android.Manifest
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
+
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
+import androidx.core.content.ContextCompat
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WorkoutTrackerScreen(navController: NavController? = null) {
     val viewModel: WorkoutTrackerViewModel = viewModel()
@@ -69,6 +70,29 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
         viewModel.checkWorkoutStatus(context)
     }
     
+    // Request notification permission
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            println("Notification permission granted")
+        } else {
+            println("Notification permission denied")
+        }
+    }
+    
+    // Request permission when screen is first displayed
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            try {
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                println("WorkoutTrackerScreen: Notification permission request launched")
+            } catch (e: Exception) {
+                println("WorkoutTrackerScreen: Failed to request notification permission: ${e.message}")
+            }
+        }
+    }
+    
     // Handle app lifecycle to sync with service only when necessary
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -93,6 +117,68 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
         }
     }
     
+    // Handle workout stopped broadcasts from notifications
+    DisposableEffect(Unit) {
+        // Only register receiver if we have a valid context, the app is active, and there might be an active workout
+        if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            println("WorkoutTrackerScreen: Context is null or app not active, skipping receiver registration")
+            return@DisposableEffect onDispose { }
+        }
+        
+
+        
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == "com.velaphi.workouttracker.WORKOUT_STOPPED") {
+                    // Refresh workout status when stopped from notification
+                    viewModel.checkWorkoutStatus(context ?: return)
+                }
+            }
+        }
+        
+        val filter = IntentFilter("com.velaphi.workouttracker.WORKOUT_STOPPED")
+        
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                // For API 33+, use the new flag
+                context.registerReceiver(receiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED)
+                println("WorkoutTrackerScreen: Broadcast receiver registered successfully with RECEIVER_NOT_EXPORTED")
+            } else {
+                // For older versions, use the old method
+                ContextCompat.registerReceiver(
+                    context,
+                    receiver,
+                    filter,
+                    ContextCompat.RECEIVER_NOT_EXPORTED
+                )
+                println("WorkoutTrackerScreen: Broadcast receiver registered successfully with old method")
+            }
+        } catch (e: Exception) {
+            // Fallback to old method if new method fails
+            println("WorkoutTrackerScreen: Using fallback receiver registration: ${e.message}")
+            try {
+                ContextCompat.registerReceiver(
+                    context,
+                    receiver,
+                    filter,
+                    ContextCompat.RECEIVER_NOT_EXPORTED
+                )
+                println("WorkoutTrackerScreen: Fallback receiver registration successful")
+            } catch (fallbackException: Exception) {
+                println("WorkoutTrackerScreen: Failed to register receiver even with fallback: ${fallbackException.message}")
+            }
+        }
+        
+        onDispose {
+            try {
+                context.unregisterReceiver(receiver)
+                println("WorkoutTrackerScreen: Broadcast receiver unregistered successfully")
+            } catch (e: Exception) {
+                println("WorkoutTrackerScreen: Error unregistering receiver: ${e.message}")
+            }
+        }
+    }
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -108,18 +194,44 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
             modifier = Modifier.padding(bottom = 24.dp)
         )
         
-
+        // Notification permission status
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Notifications",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Notification permission requested",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
         
         // Timer Card - Moved to top
         WorkoutStartCard(
             viewModel = viewModel,
-            onStartWorkout = {
-                viewModel.startWorkout(context)
-            },
             onStopWorkout = {
                 viewModel.stopWorkout(context)
             },
-            enabled = workoutGoals.isNotEmpty(), // Only enable when goals are selected
             modifier = Modifier.padding(bottom = 16.dp)
         )
         
@@ -195,9 +307,6 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
                 }
             }
         }
-        
-        // Selected Exercises Summary
-        // Removed as per edit hint
         
         // Note: Exercise selection and filtering has been moved to the Goal Manager screen
         Text(
