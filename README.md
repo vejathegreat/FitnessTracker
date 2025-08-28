@@ -26,6 +26,7 @@ FitnessTracker/
 - **Real-time duration tracking**
 - **Calorie calculation** based on workout type
 - **Multiple workout types** (Cardio, Strength, Flexibility, Sports, Other)
+- **Access Control** Firebase Authentication
 
 ### 2. WorkoutSummary Module
 - **Daily workout summaries** with detailed statistics
@@ -39,7 +40,7 @@ FitnessTracker/
 - **Progress visualization** with completion tracking
 - **Goal management** (add, update, delete)
 
-### 4. MealPlan Module (Bonus Feature)
+### 4. MealPlan Module 
 - **Nutrition tracking** with detailed macronutrient breakdown
 - **Meal logging** with calorie and nutrition information
 - **Recipe recommendations** based on fitness goals
