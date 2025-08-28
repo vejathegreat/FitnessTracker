@@ -1,24 +1,50 @@
 package com.velaphi.core.constants
 
 object AppConstants {
-    // Navigation routes
-    const val ROUTE_TRACKER = "tracker"
-    const val ROUTE_GOALS = "goals"
-    const val ROUTE_SUMMARY = "summary"
-    const val ROUTE_MEALS = "meals"
+    // TheMealDB Recipe Search API Configuration - Free API, no authentication required
+    // API Documentation: https://www.themealdb.com/api.php
+    const val THEMEALDB_BASE_URL = "https://www.themealdb.com/api/json/v1/1/"
     
-    // Shared preferences keys
-    const val PREFS_WORKOUT_GOALS = "workout_goals"
-    const val PREFS_WORKOUT_ACTIVE = "workout_active"
-    const val PREFS_WORKOUT_START_TIME = "workout_start_time"
+    // API Endpoints
+    const val RECIPE_SEARCH_ENDPOINT = "search.php"
+    const val RECIPE_GET_ENDPOINT = "lookup.php"
+    const val RECIPE_CATEGORIES_ENDPOINT = "categories.php"
+    const val RECIPE_RANDOM_ENDPOINT = "random.php"
+    const val RECIPE_BY_CATEGORY_ENDPOINT = "filter.php"
     
-    // Default values
-    const val DEFAULT_WORKOUT_DURATION = 0L
-    const val DEFAULT_PRIORITY = 1
-    const val MAX_VISIBLE_MUSCLE_GROUPS = 3
+    // API parameters
+    const val DEFAULT_MAX_RESULTS = 20
+    const val MAX_RESULTS = 50
+    const val DEFAULT_PAGE_NUMBER = 0
     
-    // UI constants
-    const val DEFAULT_CARD_PADDING = 16
-    const val DEFAULT_SECTION_SPACING = 24
-    const val DEFAULT_BUTTON_HEIGHT = 40
+    // Search terms for healthy foods
+    val HEALTHY_FOOD_SEARCH_TERMS = listOf(
+        "chicken",
+        "salmon",
+        "quinoa",
+        "avocado",
+        "spinach",
+        "berries",
+        "nuts",
+        "yogurt",
+        "eggs",
+        "oatmeal"
+    )
+    
+    // Food categories
+    val FOOD_CATEGORIES = listOf(
+        "Breakfast",
+        "Lunch", 
+        "Main Course",
+        "Salad",
+        "Snack",
+        "Dessert",
+        "Beverage"
+    )
+    
+    // Nutrition thresholds for healthy foods
+    const val HEALTHY_CALORIES_THRESHOLD = 400
+    const val HIGH_PROTEIN_THRESHOLD = 20
+    const val HIGH_FIBER_THRESHOLD = 8
+    const val LOW_FAT_THRESHOLD = 15
 }

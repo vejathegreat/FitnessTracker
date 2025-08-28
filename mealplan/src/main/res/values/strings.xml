@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">MealPlan</string>
+    <string name="search_recipes_hint">Search recipes...</string>
+    <string name="scan_barcode">Scan Barcode</string>
+    <string name="scan_barcode_title">Scan Barcode</string>
+    <string name="cancel">Cancel</string>
+    <string name="no_recipes_available">No recipes available</string>
+    <string name="refresh">Refresh</string>
+    <string name="nutrition_information">Nutrition Information</string>
+    <string name="calories">Calories</string>
+    <string name="protein">Protein</string>
+    <string name="carbohydrates">Carbohydrates</string>
+    <string name="fat">Fat</string>
+    <string name="fiber">Fiber</string>
+    <string name="servings">Servings</string>
+    <string name="close">Close</string>
+    <string name="retry">Retry</string>
+    <string name="no_recipes_found">No recipes found</string>
 </resources>

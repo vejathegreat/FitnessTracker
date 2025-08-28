@@ -22,6 +22,7 @@ dependencyResolutionManagement {
 rootProject.name = "FitnessTracker"
 include(":app")
 include(":core")
+include(":authetication")
 include(":workouttracker")
 include(":workoutsummary")
 include(":goalmanager")

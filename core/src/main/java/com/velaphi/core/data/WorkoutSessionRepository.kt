@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.util.*
+import timber.log.Timber
 
 class WorkoutSessionRepository private constructor(private val context: Context) {
     
@@ -25,11 +26,11 @@ class WorkoutSessionRepository private constructor(private val context: Context)
     }
     
     fun saveWorkoutSession(session: WorkoutSession) {
-        println("WorkoutSessionRepository: Saving workout session - ${session.exercise.name}")
+        Timber.d("Saving workout session - ${session.exercise.name}")
         val sessions = getAllWorkoutSessions().toMutableList()
         sessions.add(session)
         saveSessions(sessions)
-        println("WorkoutSessionRepository: Session saved. Total sessions: ${sessions.size}")
+        Timber.d("Session saved. Total sessions: ${sessions.size}")
     }
     
     fun getAllWorkoutSessions(): List<WorkoutSession> {
@@ -38,10 +39,10 @@ class WorkoutSessionRepository private constructor(private val context: Context)
         val sessions = try {
             gson.fromJson<ArrayList<WorkoutSession>>(sessionsJson, type) ?: arrayListOf()
         } catch (e: Exception) {
-            println("WorkoutSessionRepository: Error loading sessions: ${e.message}")
+            Timber.e(e, "Error loading sessions")
             arrayListOf()
         }
-        println("WorkoutSessionRepository: Loaded ${sessions.size} sessions")
+        Timber.d("Loaded ${sessions.size} sessions")
         return sessions
     }
     

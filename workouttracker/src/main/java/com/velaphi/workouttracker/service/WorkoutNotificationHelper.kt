@@ -8,7 +8,6 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.velaphi.workouttracker.R
-import com.velaphi.workouttracker.MainActivity
 
 class WorkoutNotificationHelper(private val context: Context) {
     
@@ -56,10 +55,10 @@ class WorkoutNotificationHelper(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         
-        val openAppIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            // Add extra to indicate we want to open the workout tracker
-            putExtra("open_screen", "tracker")
+        val openAppIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("fitnesstracker://tracker")).apply {
+            setPackage("com.velaphi.fitnesstracker")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
+            putExtra("from_notification", true)
         }
         
         val openAppPendingIntent = PendingIntent.getActivity(

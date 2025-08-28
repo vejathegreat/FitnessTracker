@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import timber.log.Timber
 
 class WorkoutGoalRepository private constructor(private val context: Context) {
     
@@ -19,13 +20,13 @@ class WorkoutGoalRepository private constructor(private val context: Context) {
         fun getInstance(context: Context): WorkoutGoalRepository {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: WorkoutGoalRepository(context.applicationContext).also { 
-                    INSTANCE = it
-                    println("WorkoutGoalRepository: Created new singleton instance")
+                                    INSTANCE = it
+                Timber.d("Created new singleton instance")
                 }
             }.also {
-                if (INSTANCE != null) {
-                    println("WorkoutGoalRepository: Returning existing singleton instance")
-                }
+                            if (INSTANCE != null) {
+                Timber.d("Returning existing singleton instance")
+            }
             }
         }
     }
@@ -62,7 +63,7 @@ class WorkoutGoalRepository private constructor(private val context: Context) {
         saveGoals()
         
         // Debug: Log the goal selection
-        println("WorkoutGoalRepository: Added goal for ${exercise.name}, total goals: ${currentGoals.size}")
+        Timber.d("Added goal for ${exercise.name}, total goals: ${currentGoals.size}")
     }
     
     fun deselectGoal(exercise: WorkoutExercise) {
@@ -77,7 +78,7 @@ class WorkoutGoalRepository private constructor(private val context: Context) {
             saveGoals()
             
             // Debug: Log the goal deselection
-            println("WorkoutGoalRepository: Removed goal for ${exercise.name}, total goals: ${currentGoals.size}")
+            Timber.d("Removed goal for ${exercise.name}, total goals: ${currentGoals.size}")
         }
     }
     
@@ -142,7 +143,7 @@ class WorkoutGoalRepository private constructor(private val context: Context) {
     fun triggerUpdate() {
         val currentGoals = _goals.value
         _goals.value = currentGoals
-        println("WorkoutGoalRepository: Manually triggered StateFlow update with ${currentGoals.size} goals")
+        Timber.d("Manually triggered StateFlow update with ${currentGoals.size} goals")
     }
     
     private fun getNextPriority(): Int {
@@ -161,12 +162,12 @@ class WorkoutGoalRepository private constructor(private val context: Context) {
             "${goal.exercise.id}|${goal.isSelected}|${goal.priority}|${goal.isActive}"
         }.joinToString(";")
         prefs.edit().putString("goals", goalsJson).apply()
-        println("WorkoutGoalRepository: Saved goals to JSON: '$goalsJson'")
+        Timber.d("Saved goals to JSON: '$goalsJson'")
     }
     
     private fun loadGoals() {
         val goalsJson = prefs.getString("goals", "") ?: ""
-        println("WorkoutGoalRepository: Loading goals from JSON: '$goalsJson'")
+        Timber.d("Loading goals from JSON: '$goalsJson'")
         
         if (goalsJson.isNotEmpty()) {
             val goalsList = goalsJson.split(";").mapNotNull { goalString ->
@@ -185,9 +186,9 @@ class WorkoutGoalRepository private constructor(private val context: Context) {
                 } else null
             }
             _goals.value = goalsList.sortedByDescending { it.priority }
-            println("WorkoutGoalRepository: Loaded ${goalsList.size} goals: ${goalsList.map { it.exercise.name }}")
+            Timber.d("Loaded ${goalsList.size} goals: ${goalsList.map { it.exercise.name }}")
         } else {
-            println("WorkoutGoalRepository: No goals found in storage")
+            Timber.d("No goals found in storage")
         }
     }
 }

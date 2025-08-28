@@ -1,8 +1,9 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
-    id("com.google.dagger.hilt.android")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -52,6 +53,9 @@ dependencies {
     // Core module
     implementation(project(":core"))
     
+    // Authentication module
+    implementation(project(":authetication"))
+    
     // Feature modules
     implementation(project(":workouttracker"))
     implementation(project(":workoutsummary"))
@@ -75,6 +79,7 @@ dependencies {
     
     // Dependency Injection
     implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
     
     // Coroutines
@@ -89,6 +94,13 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
+    
+    // Firebase
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    
+    // Logging
+    implementation(libs.timber)
     
     // Testing
     testImplementation(libs.junit)

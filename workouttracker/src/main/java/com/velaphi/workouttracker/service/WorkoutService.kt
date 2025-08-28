@@ -10,7 +10,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.velaphi.workouttracker.MainActivity
+
 import com.velaphi.core.data.WorkoutExerciseRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
 class WorkoutService : Service() {
     
     companion object {
-        const val CHANNEL_ID = "workout_channel"
+        const val CHANNEL_ID = "workout_notifications"
         const val NOTIFICATION_ID = 1
         const val ACTION_START_WORKOUT = "com.velaphi.workouttracker.START_WORKOUT"
         const val ACTION_STOP_WORKOUT = "com.velaphi.workouttracker.STOP_WORKOUT"
@@ -44,16 +44,20 @@ class WorkoutService : Service() {
     
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
+        // Notification channel is created by WorkoutNotificationHelper
     }
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        println("WorkoutService: onStartCommand called with action: ${intent?.action}")
+        
         when (intent?.action) {
             ACTION_START_WORKOUT -> {
+                println("WorkoutService: Starting workout...")
                 val exerciseId = intent.getStringExtra(EXTRA_EXERCISE_ID)
                 startWorkout(exerciseId)
             }
             ACTION_STOP_WORKOUT -> {
+                println("WorkoutService: Stopping workout...")
                 stopWorkout()
             }
         }
@@ -86,8 +90,11 @@ class WorkoutService : Service() {
     }
     
     private fun stopWorkout() {
+        println("WorkoutService: stopWorkout called")
+        
         workoutJob?.cancel()
         workoutJob = null
+        println("WorkoutService: Workout job cancelled")
         
         // Clear workout state
         val prefs = getSharedPreferences("workout_prefs", Context.MODE_PRIVATE)
@@ -96,10 +103,12 @@ class WorkoutService : Service() {
             .putLong(PREF_WORKOUT_START_TIME, 0)
             .putString(PREF_ACTIVE_EXERCISE_ID, null)
             .apply()
+        println("WorkoutService: SharedPreferences cleared")
         
         // Stop foreground service
         stopForeground(true)
         stopSelf()
+        println("WorkoutService: Service stopped")
     }
     
     private fun startWorkoutTimer() {
@@ -134,7 +143,8 @@ class WorkoutService : Service() {
             WorkoutExerciseRepository.getWorkoutExercises().find { it.id == id }?.name
         } ?: "Workout"
         
-        val intent = Intent(this, MainActivity::class.java).apply {
+        val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("fitnesstracker://tracker")).apply {
+            setPackage("com.velaphi.fitnesstracker")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         
@@ -157,24 +167,6 @@ class WorkoutService : Service() {
     private fun updateNotification() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, createNotification())
-    }
-    
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Workout Service",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "Shows workout progress"
-                setShowBadge(false)
-                enableLights(false)
-                enableVibration(false)
-            }
-            
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
     }
     
     override fun onBind(intent: Intent?): IBinder? = null

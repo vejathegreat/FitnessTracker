@@ -1,70 +1,81 @@
 package com.velaphi.fitnesstracker
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import com.velaphi.workouttracker.WorkoutTrackerScreen
-import com.velaphi.workoutsummary.WorkoutSummaryScreen
+import com.velaphi.core.navigation.BottomNavItem
 import com.velaphi.goalmanager.GoalManagerScreen
 import com.velaphi.mealplan.MealPlanScreen
-import com.velaphi.core.navigation.BottomNavItem
+import com.velaphi.workoutsummary.WorkoutSummaryScreen
+import com.velaphi.workouttracker.WorkoutTrackerScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainScreen(navController: androidx.navigation.NavHostController? = null) {
-    val internalNavController = rememberNavController()
-    val actualNavController = navController ?: internalNavController
-    
+fun MainScreen(
+    navController: androidx.navigation.NavHostController,
+    onSignOut: () -> Unit = {},
+    initialScreen: String? = null
+) {
     val items = listOf(
         BottomNavItem.Tracker,
         BottomNavItem.Goals,
         BottomNavItem.Summary,
         BottomNavItem.Meals
     )
-    val navBackStackEntry by actualNavController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+
+    var selectedTab by remember { mutableStateOf(initialScreen ?: BottomNavItem.Goals.route) }
+
+    LaunchedEffect(initialScreen) {
+        if (initialScreen != null) {
+            selectedTab = initialScreen
+            println("MainScreen: initialScreen set to $initialScreen, selectedTab now $selectedTab")
+        }
+    }
 
     Scaffold(
         bottomBar = {
             NavigationBar {
                 items.forEach { item ->
                     NavigationBarItem(
-                        selected = currentRoute == item.route,
+                        selected = selectedTab == item.route,
                         onClick = {
-                            actualNavController.navigate(item.route) {
-                                popUpTo(actualNavController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
+                            selectedTab = item.route
                         },
                         icon = { Icon(item.icon, contentDescription = item.label) },
                         label = { Text(item.label) }
                     )
                 }
+                
+                // Add sign out button
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onSignOut,
+                    icon = { Icon(Icons.Default.ExitToApp, contentDescription = "Sign Out") },
+                    label = { Text("Sign Out") }
+                )
             }
         }
     ) { innerPadding ->
-        NavHost(
-            navController = actualNavController,
-            startDestination = BottomNavItem.Tracker.route,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable(BottomNavItem.Goals.route) { GoalManagerScreen() }
-            composable(BottomNavItem.Meals.route) { MealPlanScreen() }
-            composable(BottomNavItem.Summary.route) { WorkoutSummaryScreen() }
-            composable(BottomNavItem.Tracker.route) { WorkoutTrackerScreen(actualNavController) }
+        when (selectedTab) {
+            "goals" -> GoalManagerScreen()
+            "meals" -> MealPlanScreen()
+            "summary" -> WorkoutSummaryScreen()
+            "tracker" -> WorkoutTrackerScreen(navController)
+            else -> GoalManagerScreen()
         }
     }
 }

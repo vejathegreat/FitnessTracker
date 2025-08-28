@@ -190,13 +190,6 @@ fun WorkoutTrackerScreen(navController: NavController? = null) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Header
-        Text(
-            text = stringResource(R.string.workout_tracker_title),
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
         
         // Notification permission status
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

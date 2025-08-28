@@ -7,12 +7,14 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,15 +42,7 @@ fun GoalManagerScreen() {
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Header
-        Text(
-            text = stringResource(R.string.exercise_goals_and_selection),
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        
-        // Category Filter Section
+
         Text(
             text = stringResource(R.string.filter_by_category),
             style = MaterialTheme.typography.titleLarge,
@@ -141,7 +135,11 @@ private fun AvailableExerciseCard(
             containerColor = if (isSelected) MaterialTheme.colorScheme.surfaceVariant
             else MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        )
     ) {
         Row(
             modifier = Modifier
@@ -165,23 +163,11 @@ private fun AvailableExerciseCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    exercise.muscleGroups.take(3).forEach { muscleGroup ->
-                        Surface(
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                            shape = MaterialTheme.shapes.small
-                        ) {
-                            Text(
-                                text = muscleGroup.name.replace("_", " "),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                            )
-                        }
-                    }
-                }
+                // Muscle group chips with proper wrapping using custom layout
+                WrappingChips(
+                    items = exercise.muscleGroups.take(3).map { it.name.replace("_", " ") },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
             
             // Add/Remove goal button
@@ -200,6 +186,38 @@ private fun AvailableExerciseCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(if (isSelected) stringResource(R.string.remove) else stringResource(R.string.add_goal))
+            }
+        }
+    }
+}
+
+@Composable
+private fun WrappingChips(
+    items: List<String>,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        items.forEach { item ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Bullet point
+                Surface(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = androidx.compose.foundation.shape.CircleShape,
+                    modifier = Modifier.size(4.dp)
+                ) { }
+                
+                // Item text
+                Text(
+                    text = item,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

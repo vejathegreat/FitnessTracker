@@ -12,3 +12,5 @@ sealed class BottomNavItem(val label: String, val route: String, val icon: Image
     object Summary : BottomNavItem("Summary", "summary", androidx.compose.material.icons.Icons.Default.Assessment)
     object Tracker : BottomNavItem("Tracker", "tracker", androidx.compose.material.icons.Icons.Default.FitnessCenter)
 }
+
+
