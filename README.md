@@ -276,9 +276,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 4. Add tests for new features
 5. Submit a pull request
 
-## 📞 Support
+## 📞 Images
 
-For questions or support, please open an issue on GitHub or contact the development team.
+<img width="1054" height="429" alt="Screenshot 2025-08-29 at 01 53 40" src="https://github.com/user-attachments/assets/b17be041-259a-48d4-9cf2-892b59a825fc" />
+
 
 ---
 
